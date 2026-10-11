@@ -1,0 +1,52 @@
+plugins {
+    id 'fabric-loom' version '1.6.12'
+}
+
+version = "26.02"
+group = project.maven_group
+// 使用惰性版本值，兼容 settings.gradle 的最终版本覆盖，后续版本复制项目后自动继承命名规则。
+base {
+    archivesName.set(providers.provider { "Crosssave-v${project.version}-mc1.20.1" })
+}
+tasks.withType(org.gradle.api.tasks.bundling.AbstractArchiveTask).configureEach {
+    // 版本已经包含在基本文件名中，禁止 Gradle 再追加一次版本。
+    archiveVersion.set("")
+}
+
+repositories { mavenCentral() }
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    // 命令、客户端时钟和快捷键模块的版本均由固定的 Fabric API 版本确定。
+    modImplementation fabricApi.module('fabric-command-api-v2', project.fabric_version)
+    modImplementation fabricApi.module('fabric-lifecycle-events-v1', project.fabric_version)
+    modImplementation fabricApi.module('fabric-key-binding-api-v1', project.fabric_version)
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    // 通过 Fabric 的测试启动器加载游戏类，使用加载器提供的正常访问修正。
+    testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.2'
+}
+
+processResources {
+    inputs.property 'version', project.version
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(17)
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 17
+}
+
+test { useJUnitPlatform() }
+
+tasks.named('wrapper') {
+    gradleVersion = '8.7'
+    distributionType = Wrapper.DistributionType.BIN
+    distributionSha256Sum = '544c35d6bd849ae8a5ed0bcea39ba677dc40f49df7d1835561582da2009b961d'
+}

@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "crosssave",
+  "version": "26.1+mc1.20.1",
+  "name": "Crosssave",
+  "description": "宇宙奇点：单人跨存档手动与自动迁移、真实加载进度、噪点、声呐及四十种语言。适配 Minecraft 1.20.1 Fabric。",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "cn.crosssave.CrossSaveClient"
+    ]
+  },
+  "mixins": [
+    "crosssave.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.11",
+    "minecraft": "~1.20.1",
+    "java": ">=17",
+    "fabric-api-base": ">=0.4.31",
+    "fabric-command-api-v2": ">=2.2.13",
+    "fabric-lifecycle-events-v1": ">=2.2.22",
+    "fabric-key-binding-api-v1": ">=1.0.37"
+  }
+}

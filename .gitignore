@@ -1,0 +1,12 @@
+.gradle/
+build/
+run/
+.idea/
+*.iml
+out/
+.tooling/
+.build-logs/
+logs/
+mods/
+__pycache__/
+*.log

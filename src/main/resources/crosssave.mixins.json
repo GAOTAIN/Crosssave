@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "package": "cn.crosssave.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "crosssave-refmap.json",
+  "client": [
+    "MinecraftClientMixin",
+    "IntegratedServerLoaderInvoker",
+    "MinecraftServerAccessor",
+    "SplashOverlayMixin",
+    "GameRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

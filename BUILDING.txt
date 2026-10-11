@@ -1,0 +1,21 @@
+CrossSave 26.03 构建环境说明
+
+双击 build.bat：使用项目专用的 Java 17 和 Gradle 8.7，执行 clean build。
+构建结束后窗口保留；日志在 .build-logs\build.log。
+成功后模组文件在 build\libs\crosssave-26.03.jar。
+双击 gradlew.bat：显示 Java 和 Gradle 版本，随后保留窗口。
+命令行构建：gradlew.bat build
+断网时构建：gradlew.bat --offline build
+不希望构建脚本暂停：build.bat --no-pause
+
+Java 17 安装目录：.tooling\jdk17
+Gradle 与依赖缓存：.tooling\gradle-user-home
+该目录内的构建环境设置限制为 2 个工作进程，并禁用常驻守护进程。
+缓存已包含当前项目所需依赖，build.bat 使用离线构建。
+新增依赖后需先完成联网下载，再进行离线构建。
+继续使用复制过来的 Java 17 和依赖缓存；没有修改系统环境。项目版本号已更新为 26.03，依赖版本不变。
+整个项目目录可移动；不要单独删除 .tooling，否则需要重新配置环境。
+
+Java 来源：Microsoft Build of OpenJDK 17.0.20.1，已校验官方 SHA-256。
+Gradle 来源：Gradle 官方 8.7 发行包，Wrapper 已锁定官方 SHA-256。
+依赖为官方发布文件，未修改任何网络请求或 HTTPS 校验。

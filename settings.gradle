@@ -1,0 +1,15 @@
+pluginManagement {
+    repositories {
+        maven { url = 'https://maven.fabricmc.net/' }
+        gradlePluginPortal()
+    }
+}
+
+rootProject.name = 'crosssave'
+
+// 保留原有 gradle.properties，在项目配置完成后升级最终版本；归档名称通过惰性版本引用自动更新。
+gradle.rootProject { project ->
+    project.afterEvaluate {
+        project.version = '26.1'
+    }
+}

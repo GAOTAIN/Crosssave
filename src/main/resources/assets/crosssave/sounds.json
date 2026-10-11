@@ -1,0 +1,10 @@
+{
+  "sonar": {
+    "sounds": [
+      {
+        "name": "crosssave:sonar",
+        "stream": false
+      }
+    ]
+  }
+}
