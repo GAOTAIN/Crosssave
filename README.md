@@ -77,7 +77,7 @@
 
 `zh_cn`、`en_us`、`zh_tw`、`lzh`、`en_gb`、`ru_ru`、`uk_ua`、`de_de`、`es_es`、`es_mx`、`pt_br`、`it_it`、`nl_nl`、`sv_se`、`nb_no`、`da_dk`、`fi_fi`、`is_is`、`pl_pl`、`cs_cz`、`sk_sk`、`hu_hu`、`el_gr`、`tr_tr`、`ko_kr`、`vi_vn`、`th_th`、`id_id`、`hi_in`、`bn_bd`、`zh_hk`、`en_pt`、`bg_bg`、`sr_sp`、`hr_hr`、`sl_si`、`lt_lt`、`lv_lv`、`et_ee`、`tlh_aa`。
 
-包含繁体中文、文言文、英式英语、香港繁体中文、海盗语及克林贡语，不含日语和阿拉伯语。新增译文由人工智能生成并继承自 26.05。
+包含繁体中文、文言文、英式英语、香港繁体中文、海盗语及克林贡语，不含日语和阿拉伯语。
 
 ## Minecraft 版本防呆
 
