@@ -9,8 +9,11 @@ public final class InventoryMerger {
     private InventoryMerger() {
     }
 
-    public static int merge(InventorySnapshot snapshot, List<ItemStack> main, List<ItemStack> armor,
-                            List<ItemStack> offhand, int currentLevel, Consumer<ItemStack> drop) {
+    public static ExperiencePoints.State merge(InventorySnapshot snapshot, List<ItemStack> main, List<ItemStack> armor,
+                                               List<ItemStack> offhand, ExperiencePoints.State currentExperience,
+                                               Consumer<ItemStack> drop) {
+        // 先验证总点数求和，异常时不开始改动物品栏；经验按原版曲线反算等级和进度。
+        ExperiencePoints.State mergedExperience = ExperiencePoints.merge(snapshot.experience(), currentExperience);
         // 不合并到已有堆叠，不覆盖目标主背包；仅使用空位，溢出部分掉落。
         for (ItemStack saved : snapshot.main()) {
             ItemStack remaining = NestedInventorySafety.copyFullNbt(saved);
@@ -27,7 +30,7 @@ public final class InventoryMerger {
         dropEquipment(offhand, drop);
         replaceEquipment(armor, snapshot.armor());
         replaceEquipment(offhand, snapshot.offhand());
-        return Math.max(currentLevel, snapshot.experienceLevel());
+        return mergedExperience;
     }
 
     private static void dropEquipment(List<ItemStack> current, Consumer<ItemStack> drop) {

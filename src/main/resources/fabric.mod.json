@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "id": "crosssave",
-  "version": "26.1+mc1.20.1",
+  "version": "26.1.1",
   "name": "Crosssave",
-  "description": "宇宙奇点：单人跨存档手动与自动迁移、真实加载进度、噪点、声呐及四十种语言。适配 Minecraft 1.20.1 Fabric。",
+  "description": "经验熔铸：总经验点数合并，单人跨存档手动与自动迁移、真实加载进度、噪点、声呐及四十种语言。适配 Minecraft 1.20.1 Fabric。",
   "environment": "client",
   "entrypoints": {
     "client": [

@@ -2,7 +2,7 @@ plugins {
     id 'fabric-loom' version '1.6.12'
 }
 
-version = "26.02"
+version = "26.1.1"
 group = project.maven_group
 // 使用惰性版本值，兼容 settings.gradle 的最终版本覆盖，后续版本复制项目后自动继承命名规则。
 base {
@@ -11,6 +11,14 @@ base {
 tasks.withType(org.gradle.api.tasks.bundling.AbstractArchiveTask).configureEach {
     // 版本已经包含在基本文件名中，禁止 Gradle 再追加一次版本。
     archiveVersion.set("")
+}
+
+loom {
+    mixin {
+        // 正式 JAR 改名时 Loom 默认会连带改变映射文件名，必须与 Mixin 配置中的固定名称保持一致。
+        useLegacyMixinAp = true
+        defaultRefmapName = "crosssave-refmap.json"
+    }
 }
 
 repositories { mavenCentral() }
@@ -50,3 +58,37 @@ tasks.named('wrapper') {
     distributionType = Wrapper.DistributionType.BIN
     distributionSha256Sum = '544c35d6bd849ae8a5ed0bcea39ba677dc40f49df7d1835561582da2009b961d'
 }
+
+// 开发环境和普通单元测试使用命名空间，不能发现正式 JAR 缺少映射；在构建中单独检查生产产物。
+tasks.register('verifyProductionRefmap') {
+    dependsOn tasks.named('remapJar')
+    inputs.file(tasks.named('remapJar').flatMap { it.archiveFile })
+    doLast {
+        def artifact = tasks.named('remapJar').get().archiveFile.get().asFile
+        new java.util.zip.ZipFile(artifact).withCloseable { archive ->
+            def configEntry = archive.getEntry('crosssave.mixins.json')
+            if (configEntry == null) throw new GradleException('正式 JAR 缺少 Mixin 配置')
+            def config = archive.getInputStream(configEntry).withCloseable {
+                new groovy.json.JsonSlurper().parse(it)
+            }
+            def mapEntry = archive.getEntry(config.refmap as String)
+            if (mapEntry == null) throw new GradleException('正式 JAR 缺少配置指定的映射文件：' + config.refmap)
+            def refmap = archive.getInputStream(mapEntry).withCloseable {
+                new groovy.json.JsonSlurper().parse(it)
+            }
+            config.client.each { mixin ->
+                def owner = config.package.replace('.', '/') + '/' + mixin
+                if (!refmap.mappings[owner]) throw new GradleException('缺少生产 Mixin 映射：' + owner)
+            }
+            def setScreen = refmap.mappings['cn/crosssave/mixin/MinecraftClientMixin']['setScreen']
+            if (setScreen == null || !setScreen.startsWith('Lnet/minecraft/class_310;method_')) {
+                throw new GradleException('setScreen 尚未映射到 1.20.1 正式环境')
+            }
+            if (refmap.data['named:intermediary'] != refmap.mappings) {
+                throw new GradleException('正式环境映射上下文不一致')
+            }
+            logger.lifecycle('正式 JAR 的 Mixin 映射验证通过：' + config.refmap)
+        }
+    }
+}
+tasks.named('check') { dependsOn tasks.named('verifyProductionRefmap') }

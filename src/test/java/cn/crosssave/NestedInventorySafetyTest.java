@@ -94,7 +94,7 @@ class NestedInventorySafetyTest {
         InventorySnapshot saved = snapshot(incoming, slots(1));
         List<ItemStack> drops = new ArrayList<>();
         List<ItemStack> armor = slots(4);
-        InventoryMerger.merge(saved, target, armor, offhand, 0, drops::add);
+        InventoryMerger.merge(saved, target, armor, offhand, ExperiencePoints.fromTotalPoints(0), drops::add);
         assertEquals(2, drops.size());
         assertTrue(NestedInventorySafety.matches(saved, before, target, armor, offhand, drops));
         for (ItemStack drop : drops) {
@@ -112,11 +112,11 @@ class NestedInventorySafetyTest {
         List<ItemStack> offhand = slots(1);
         InventorySnapshot before = snapshot(target, offhand);
         List<ItemStack> drops = new ArrayList<>();
-        InventoryMerger.merge(saved, target, armor, offhand, 0, drops::add);
+        InventoryMerger.merge(saved, target, armor, offhand, ExperiencePoints.fromTotalPoints(0), drops::add);
         target.get(0).getSubNbt("BlockEntityTag").remove("Items");
         assertFalse(NestedInventorySafety.matches(saved, before, target, armor, offhand, drops));
         OriginalPlayerState.restoreSlots(before.main(), target);
-        InventoryMerger.merge(saved, target, armor, offhand, 0, drops::add);
+        InventoryMerger.merge(saved, target, armor, offhand, ExperiencePoints.fromTotalPoints(0), drops::add);
         assertTrue(NestedInventorySafety.matches(saved, before, target, armor, offhand, drops));
         assertEquals(NestedInventorySafety.fullNbt(saved.main().get(0)), NestedInventorySafety.fullNbt(target.get(0)));
     }
@@ -131,11 +131,11 @@ class NestedInventorySafetyTest {
         List<ItemStack> offhand = slots(1);
         InventorySnapshot before = snapshot(target, offhand);
         List<ItemStack> drops = new ArrayList<>();
-        InventoryMerger.merge(saved, target, armor, offhand, 0, drops::add);
+        InventoryMerger.merge(saved, target, armor, offhand, ExperiencePoints.fromTotalPoints(0), drops::add);
         target.get(0).getSubNbt("BlockEntityTag").getList("Items", 10).getCompound(1).putByte("Count", (byte) 1);
         assertFalse(NestedInventorySafety.matches(saved, before, target, armor, offhand, drops));
         OriginalPlayerState.restoreSlots(before.main(), target);
-        InventoryMerger.merge(saved, target, armor, offhand, 0, drops::add);
+        InventoryMerger.merge(saved, target, armor, offhand, ExperiencePoints.fromTotalPoints(0), drops::add);
         target.set(1, packedBox());
         assertFalse(NestedInventorySafety.matches(saved, before, target, armor, offhand, drops));
     }

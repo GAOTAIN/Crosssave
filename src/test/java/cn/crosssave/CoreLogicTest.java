@@ -86,8 +86,11 @@ class CoreLogicTest {
         main.set(35, new ItemStack(Items.DIAMOND, 7));
         List<ItemStack> drops = new ArrayList<>();
         InventorySnapshot saved = snapshot(main, emptySlots(4), emptySlots(1), 30);
-        int level = InventoryMerger.merge(saved, current, emptySlots(4), emptySlots(1), 8, drops::add);
-        assertEquals(30, level);
+        ExperiencePoints.State experience = InventoryMerger.merge(saved, current, emptySlots(4), emptySlots(1),
+                ExperiencePoints.fromLevelProgress(8, 0.0F), drops::add);
+        assertEquals(31, experience.level());
+        assertEquals(1507, experience.totalPoints());
+        assertEquals(0, experience.pointsIntoLevel());
         assertEquals(12, current.get(5).getCount());
         assertEquals(63, current.get(0).getCount());
         assertEquals(1, drops.size());
@@ -107,13 +110,15 @@ class CoreLogicTest {
         List<ItemStack> savedArmor = emptySlots(4);
         savedArmor.set(3, new ItemStack(Items.DIAMOND_HELMET));
         List<ItemStack> drops = new ArrayList<>();
-        int level = InventoryMerger.merge(snapshot(emptySlots(36), savedArmor, emptySlots(1), 2),
-                emptySlots(36), armor, offhand, 50, stack -> {
+        ExperiencePoints.State experience = InventoryMerger.merge(snapshot(emptySlots(36), savedArmor, emptySlots(1), 2),
+                emptySlots(36), armor, offhand, ExperiencePoints.fromLevelProgress(50, 0.0F), stack -> {
                     assertSame(oldBoots, armor.get(0));
                     assertTrue(offhand.get(0).isOf(Items.SHIELD));
                     drops.add(stack);
                 });
-        assertEquals(50, level);
+        assertEquals(50, experience.level());
+        assertEquals(5361, experience.totalPoints());
+        assertEquals(16, experience.pointsIntoLevel());
         assertEquals(3, drops.size());
         assertTrue(ItemStack.areEqual(oldBoots, drops.get(0)));
         assertNotSame(oldBoots, drops.get(0));
@@ -210,7 +215,8 @@ class CoreLogicTest {
         List<ItemStack> targetArmor = emptySlots(4);
         List<ItemStack> targetOffhand = emptySlots(1);
         List<ItemStack> drops = new ArrayList<>();
-        InventoryMerger.merge(persisted, targetMain, targetArmor, targetOffhand, 3, drops::add);
+        InventoryMerger.merge(persisted, targetMain, targetArmor, targetOffhand,
+                ExperiencePoints.fromLevelProgress(3, 0.0F), drops::add);
         assertEquals(64, targetMain.get(0).getCount());
         assertEquals(7, targetMain.stream().filter(stack -> stack.isOf(Items.DIAMOND)).mapToInt(ItemStack::getCount).sum());
         assertTrue(targetArmor.get(3).isOf(Items.DIAMOND_HELMET));
@@ -314,7 +320,8 @@ class CoreLogicTest {
                 source, emptySlots(4), emptySlots(1));
         InventorySnapshot persisted = store.readSnapshot(pending);
         List<ItemStack> target = emptySlots(36);
-        InventoryMerger.merge(persisted, target, emptySlots(4), emptySlots(1), 0, stack -> fail("不应掉落"));
+        InventoryMerger.merge(persisted, target, emptySlots(4), emptySlots(1),
+                ExperiencePoints.fromTotalPoints(0), stack -> fail("不应掉落"));
         Path nbtFile = gameDirectory.resolve("crosssave").resolve(pending.playerUuid() + ".nbt");
         Files.delete(nbtFile);
         Files.createDirectory(nbtFile);

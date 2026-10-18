@@ -190,11 +190,13 @@ public final class CrossSaveClient implements ClientModInitializer {
         OriginalPlayerState before = null;
         TransferStore.Pending saved = null;
         try {
-            InventorySnapshot snapshot = InventorySnapshot.capture(player.getUuid(), player.getInventory(), player.experienceLevel);
+            InventorySnapshot snapshot = InventorySnapshot.capture(player.getUuid(), player.getInventory(),
+                    player.experienceLevel, player.experienceProgress);
             before = OriginalPlayerState.capture(player, snapshot);
             // 手动命令、手动界面与自动切换共用同一移出入口，避免任何路径仅保存副本。
             saved = store.saveAndRemove(targetFolder, snapshot, player.getInventory().main,
                     player.getInventory().armor, player.getInventory().offHand);
+            ExperiencePoints.removeSource(player, snapshot);
             player.getInventory().markDirty();
             player.currentScreenHandler.sendContentUpdates();
             if (showManualMessage) {
@@ -338,13 +340,11 @@ public final class CrossSaveClient implements ClientModInitializer {
             if (!appliedTransfers.contains(pending.transferId())) {
                 InventorySnapshot snapshot = store.readSnapshot(pending);
                 targetBeforeMerge = OriginalPlayerState.capture(player, InventorySnapshot.capture(player.getUuid(),
-                        player.getInventory(), player.experienceLevel));
-                int level = InventoryMerger.merge(snapshot, player.getInventory().main, player.getInventory().armor,
-                        player.getInventory().offHand, player.experienceLevel,
+                        player.getInventory(), player.experienceLevel, player.experienceProgress));
+                ExperiencePoints.State experience = InventoryMerger.merge(snapshot, player.getInventory().main, player.getInventory().armor,
+                        player.getInventory().offHand, ExperiencePoints.capture(player),
                         stack -> createdDrops.add(dropAtFeet(player, stack)));
-                if (level > player.experienceLevel) {
-                    player.addExperienceLevels(level - player.experienceLevel);
-                }
+                ExperiencePoints.apply(player, experience);
                 if (!NestedInventorySafety.matches(snapshot, targetBeforeMerge.inventory(),
                         player.getInventory().main, player.getInventory().armor, player.getInventory().offHand,
                         createdDrops.stream().map(ItemEntity::getStack).toList())) {
@@ -355,12 +355,11 @@ public final class CrossSaveClient implements ClientModInitializer {
                     }
                     createdDrops.clear();
                     targetBeforeMerge.restore(player);
-                    int correctedLevel = InventoryMerger.merge(snapshot, player.getInventory().main,
-                            player.getInventory().armor, player.getInventory().offHand, player.experienceLevel,
+                    ExperiencePoints.State correctedExperience = InventoryMerger.merge(snapshot, player.getInventory().main,
+                            player.getInventory().armor, player.getInventory().offHand, ExperiencePoints.capture(player),
                             stack -> createdDrops.add(dropAtFeet(player, stack)));
-                    if (correctedLevel > player.experienceLevel) {
-                        player.addExperienceLevels(correctedLevel - player.experienceLevel);
-                    }
+                    // 嵌套物品重做前已恢复目标原经验，不能在首次合并结果上再加一遍。
+                    ExperiencePoints.apply(player, correctedExperience);
                     if (!NestedInventorySafety.matches(snapshot, targetBeforeMerge.inventory(),
                             player.getInventory().main, player.getInventory().armor, player.getInventory().offHand,
                             createdDrops.stream().map(ItemEntity::getStack).toList())) {
